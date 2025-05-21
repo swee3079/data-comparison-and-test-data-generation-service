@@ -1,0 +1,28 @@
+{
+  "name": "data-comparison-service",
+  "version": "1.0.0",
+  "description": "Tool for data-comparison between audience and graph response files",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swee3079/data-comparison-service-js.git"
+  },
+  "author": "sisuka weerasinghe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/swee3079/data-comparison-service-js/issues"
+  },
+  "homepage": "https://github.com/swee3079/data-comparison-service-js#readme",
+  "dependencies": {
+    "csv-parser": "^3.2.0",
+    "express": "^5.1.0",
+    "multer": "^2.0.0",
+    "nodemon": "^3.1.10"
+  }
+}
