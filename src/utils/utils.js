@@ -189,23 +189,22 @@ export const requestToJsonConverter = async function requestToJsonConverter(file
 
 
 
-export const customAudienceFileResponse = async function generateCustomAudienceFile(productListFromGraph, audId, accId, startDate, endDate) {
+export const customAudienceFileResponse = async function generateCustomAudienceFile(productListFromGraph, audIdList, accIdList, startDateList, endDateList) {
     try {
-    console.log(`utils => generateCustomAudienceFile() => function invoked..`)
-
+        console.log(`utils => generateCustomAudienceFile() => function invoked..`)
         const customAudienceFileList = []
         customAudienceFileList.push("audience_id,account_id,site_id,seller_id,supc,start_date,end_date\n")
 
         for (let i = 0; i <= productListFromGraph.length - 1; i++) {
             console.log(i)
             customAudienceFileList.push([
-                audId,
-                accId,
+                audIdList[Math.floor(Math.random() * audIdList.length)],
+                accIdList[Math.floor(Math.random() * accIdList.length)],
                 productListFromGraph[i].siteId,
                 productListFromGraph[i].sellerId,
                 productListFromGraph[i].productId,
-                startDate,
-                endDate
+                startDateList[Math.floor(Math.random() * startDateList.length)],
+                endDateList[Math.floor(Math.random() * endDateList.length)]
             ].join(',') + '\n');
         }
 
@@ -216,23 +215,23 @@ export const customAudienceFileResponse = async function generateCustomAudienceF
     }
 }
 
-export const staticAudienceFileResponse = async function generateStaticAudienceFile(productListFromGraph, audId, accId, startDate, endDate) {
-   try {
-    console.log(`utils => generateStaticAudienceFile() => function invoked..`)
+export const staticAudienceFileResponse = async function generateStaticAudienceFile(productListFromGraph, audIdList, accIdList, startDateList, endDateList) {
+    try {
+        console.log(`utils => generateStaticAudienceFile() => function invoked..`)
 
         const staicAudienceFileList = []
         staicAudienceFileList.push("audience_id,account_id,site_id,seller_id,supc,rank,start_date,end_date\n")
 
         for (let i = 0; i <= productListFromGraph.length - 1; i++) {
             staicAudienceFileList.push([
-                audId,
-                accId,
+                audIdList[Math.floor(Math.random() * audIdList.length)],
+                accIdList[Math.floor(Math.random() * accIdList.length)],
                 productListFromGraph[i].siteId,
                 productListFromGraph[i].sellerId,
                 productListFromGraph[i].productId,
                 Math.floor(Math.random() * 9) + 1,
-                startDate,
-                endDate
+                startDateList[Math.floor(Math.random() * startDateList.length)],
+                endDateList[Math.floor(Math.random() * endDateList.length)]
             ].join(',') + '\n');
         }
 

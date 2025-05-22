@@ -171,14 +171,14 @@ app.post('/api/testDataGenerator/generate', upload.fields([
     try {
 
         const graphResponseFile = req.files['graphResponseFile']?.[0]
-        const audienceId = req.body.audienceId;
-        const accountId = req.body.accountId;
-        const startDate = req.body.startDate;
-        const endDate = req.body.endDate;
+        const audienceIdList = req.body.audienceId.split(',').map(id => id.trim());
+        const accountIdList = req.body.accountId.split(',').map(id => id.trim());;
+        const startDateList = req.body.startDate.split(',').map(id => id.trim());;
+        const endDateList = req.body.endDate.split(',').map(id => id.trim());;
 
 
         let multiPartFileToJsonConvertedResp = await requestToJsonConverter(graphResponseFile.path);
-        let customAudienceFileGeneratorResp = await customAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceId,accountId,startDate,endDate);
+        let customAudienceFileGeneratorResp = await customAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceIdList,accountIdList,startDateList,endDateList);
         if(!customAudienceFileGeneratorResp){
             res.status(400).json(
                 {
@@ -188,7 +188,7 @@ app.post('/api/testDataGenerator/generate', upload.fields([
             )
         }
         
-        let staticAudienceFileGeneratorResp = await staticAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceId,accountId,startDate,endDate);
+        let staticAudienceFileGeneratorResp = await staticAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceIdList,accountIdList,startDateList,endDateList);
         if(!staticAudienceFileGeneratorResp){
             res.status(400).json(
                 {
