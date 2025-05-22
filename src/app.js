@@ -1,6 +1,6 @@
 import express from 'express'
 import multer from 'multer'
-import { requestToCSVConverter, requestToJsonConverter } from './utils/utils.js'
+import { requestToCSVConverter, requestToJsonConverter,customAudienceFileResponse,staticAudienceFileResponse } from './utils/utils.js'
 
 const upload = multer({ dest: 'src/uploads/' })
 
@@ -8,12 +8,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
-const cpUpload = upload.fields([
-    { name: 'csvFile', maxCount: 1 },
-    { name: 'jsonFile', maxCount: 8 }
-])
 
-app.post('/api/comparison/compare', cpUpload, async (req, res, next) => {
+app.post('/api/comparison/compare', upload.fields([
+    { name: 'audienceFile', maxCount: 1 },
+    { name: 'graphResponseFile', maxCount: 8 }
+]), async (req, res, next) => {
     console.log('File comaprison controller invoked...')
     try {
         let matchingSupcList = [];
@@ -24,13 +23,11 @@ app.post('/api/comparison/compare', cpUpload, async (req, res, next) => {
         let responseMessage = "Matching Complete";
         let currentExecutedIndexOfGraphResponse = 0;
 
-        //Gathering parameters from request
-        const audienceFile = req.files['csvFile']?.[0]
-        const graphResponseFile = req.files['jsonFile']?.[0]
+        const audienceFile = req.files['audienceFile']?.[0]
+        const graphResponseFile = req.files['graphResponseFile']?.[0]
         const sortByParameter = req.body.sortBy;
         const sortValueParameter = req.body.sortValue;
 
-        //Input Data Validations
         if (!audienceFile || !graphResponseFile) {
             res.status(400).json({
                 message: "Empty Request Parameters Exists",
@@ -42,7 +39,7 @@ app.post('/api/comparison/compare', cpUpload, async (req, res, next) => {
         const graphResponseResultList = await requestToJsonConverter(graphResponseFile.path, sortByParameter, sortValueParameter);
 
         if (!audienceFileInputResultList || audienceFileInputResultList.length === 0) {
-           res.status(400).json({
+            res.status(400).json({
                 message: "Audience file is empty",
                 data: null
             })
@@ -167,6 +164,59 @@ app.post('/api/comparison/compare', cpUpload, async (req, res, next) => {
     }
 })
 
+
+app.post('/api/testDataGenerator/generate', upload.fields([
+    { name: 'graphResponseFile', maxCount: 1 }
+]), async (req, res, next) => {
+    try {
+
+        const graphResponseFile = req.files['graphResponseFile']?.[0]
+        const audienceId = req.body.audienceId;
+        const accountId = req.body.accountId;
+        const startDate = req.body.startDate;
+        const endDate = req.body.endDate;
+
+
+        let multiPartFileToJsonConvertedResp = await requestToJsonConverter(graphResponseFile.path);
+        let customAudienceFileGeneratorResp = await customAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceId,accountId,startDate,endDate);
+        if(!customAudienceFileGeneratorResp){
+            res.status(400).json(
+                {
+                    message:"Custom Audience File Generation Failed",
+                    data:null
+                }
+            )
+        }
+        
+        let staticAudienceFileGeneratorResp = await staticAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceId,accountId,startDate,endDate);
+        if(!staticAudienceFileGeneratorResp){
+            res.status(400).json(
+                {
+                    message:"Static Audience File Generation Failed",
+                    data:null
+                }
+            )
+        }
+
+
+        return res.status(200).json(
+            {
+                message:"Custom & Static audience files are generated Successfully",
+                data:{
+                    customeAudienceFile:customAudienceFileGeneratorResp,
+                    staticAudienceFile:staticAudienceFileGeneratorResp
+                }
+            }
+        );
+    } catch (err) {
+        console.log(`Test Data Generation Error : ${err}`)
+        return res.status(400).json({
+            message: "Oops! Something went wrong",
+            data: null
+        }
+        )
+    }
+})
 
 
 app.listen(PORT, () => {

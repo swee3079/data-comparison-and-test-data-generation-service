@@ -189,3 +189,59 @@ export const requestToJsonConverter = async function requestToJsonConverter(file
 
 
 
+export const customAudienceFileResponse = async function generateCustomAudienceFile(productListFromGraph, audId, accId, startDate, endDate) {
+    try {
+    console.log(`utils => generateCustomAudienceFile() => function invoked..`)
+
+        const customAudienceFileList = []
+        customAudienceFileList.push("audience_id,account_id,site_id,seller_id,supc,start_date,end_date\n")
+
+        for (let i = 0; i <= productListFromGraph.length - 1; i++) {
+            console.log(i)
+            customAudienceFileList.push([
+                audId,
+                accId,
+                productListFromGraph[i].siteId,
+                productListFromGraph[i].sellerId,
+                productListFromGraph[i].productId,
+                startDate,
+                endDate
+            ].join(',') + '\n');
+        }
+
+        return Buffer.from(customAudienceFileList.join(''), 'utf8').toString('base64');
+    } catch (err) {
+        console.log(`utils => generateCustomAudienceFile() => Error occurred : ${err.stack}`)
+        return null;
+    }
+}
+
+export const staticAudienceFileResponse = async function generateStaticAudienceFile(productListFromGraph, audId, accId, startDate, endDate) {
+   try {
+    console.log(`utils => generateStaticAudienceFile() => function invoked..`)
+
+        const staicAudienceFileList = []
+        staicAudienceFileList.push("audience_id,account_id,site_id,seller_id,supc,rank,start_date,end_date\n")
+
+        for (let i = 0; i <= productListFromGraph.length - 1; i++) {
+            staicAudienceFileList.push([
+                audId,
+                accId,
+                productListFromGraph[i].siteId,
+                productListFromGraph[i].sellerId,
+                productListFromGraph[i].productId,
+                Math.floor(Math.random() * 9) + 1,
+                startDate,
+                endDate
+            ].join(',') + '\n');
+        }
+
+        return Buffer.from(staicAudienceFileList.join(''), 'utf8').toString('base64');
+    } catch (err) {
+        console.log(`utils => generateStaticAudienceFile() => Error occurred : ${err.stack}`)
+        return null;
+    }
+}
+
+
+
