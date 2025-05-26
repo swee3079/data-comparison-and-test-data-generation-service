@@ -102,7 +102,7 @@ export const requestToCSVConverter = async function requestToCSVConverter(audien
         fs.unlinkSync(audienceFilePath);
         return csvFileWithRecords;
     } catch (err) {
-        console.log(`utils => requestToCSVConverter()=> Error occured ${err}`)
+        console.log(`utils => requestToCSVConverter()=> Error occured ${err.stack}`)
         fs.unlinkSync(audienceFilePath);
         return null;
     }
@@ -153,18 +153,25 @@ async function sortTheAudienceFileForGiveSortFlagAndSortValue(csvData, sortValue
         };
 
     } catch (err) {
-        console.log(`utils => sortTheAudienceFileForGiveSortFlagAndSortValue()=> Error occured ${err}`)
+        console.log(`utils => sortTheAudienceFileForGiveSortFlagAndSortValue()=> Error occured ${err.stack}`)
         return null;
     }
 }
 
 
 
-export const requestToJsonConverter = async function requestToJsonConverter(filePath) {
+export const requestToJsonConverter = async function requestToJsonConverter(filePath, graphDataExtractionPath) {
     try {
-        const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const graphDataPathArray = graphDataExtractionPath.split(',').map(record => record.trim());
 
-        const results = jsonData?.data?.searchProductsV2?.results || [];
+        const getNestedValue = (obj, pathArray) => {
+            return pathArray.reduce((acc, key) => acc?.[key], obj);
+        };
+
+        
+        const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const results = getNestedValue(jsonData, graphDataPathArray) || [];
+
         const graphRequestDtos = results.map(record => {
             return {
                 sellerId: record.sellerId || '',
@@ -181,7 +188,7 @@ export const requestToJsonConverter = async function requestToJsonConverter(file
         return graphRequestDtos;
 
     } catch (err) {
-        console.error(err);
+        console.log(`utils => requestToJsonConverter() => Error occurred : ${err.stack}`)
         fs.unlinkSync(filePath);
         return null;
     }

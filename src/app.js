@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 
 app.post('/api/comparison/compare', upload.fields([
     { name: 'audienceFile', maxCount: 1 },
-    { name: 'graphResponseFile', maxCount: 8 }
+    { name: 'graphResponseFile', maxCount: 1 }
 ]), async (req, res, next) => {
     console.log('File comaprison controller invoked...')
     try {
@@ -22,31 +22,35 @@ app.post('/api/comparison/compare', upload.fields([
         let responseCode = "SUCCESS";
         let responseMessage = "Matching Complete";
         let currentExecutedIndexOfGraphResponse = 0;
-
+        
+        
         const audienceFile = req.files['audienceFile']?.[0]
         const graphResponseFile = req.files['graphResponseFile']?.[0]
         const sortByParameter = req.body.sortBy;
         const sortValueParameter = req.body.sortValue;
+        
+        
+        let graphDataExtractionPath = !req.body.graphDataPath ? "data,searchProductsV2,results" : req.body.graphDataPath ;
 
         if (!audienceFile || !graphResponseFile) {
-            res.status(400).json({
+           return res.status(400).json({
                 message: "Empty Request Parameters Exists",
                 data: null
             })
         }
 
         const audienceFileInputResultList = await requestToCSVConverter(audienceFile.path, sortByParameter, sortValueParameter);
-        const graphResponseResultList = await requestToJsonConverter(graphResponseFile.path, sortByParameter, sortValueParameter);
+        const graphResponseResultList = await requestToJsonConverter(graphResponseFile.path,graphDataExtractionPath);
 
         if (!audienceFileInputResultList || audienceFileInputResultList.length === 0) {
-            res.status(400).json({
+           return res.status(400).json({
                 message: "Audience file is empty",
                 data: null
             })
         }
 
         if (!graphResponseResultList || graphResponseResultList.length === 0) {
-            res.status(400).json({
+           return res.status(400).json({
                 message: "Graph response file is empty",
                 data: null
             })
@@ -146,7 +150,7 @@ app.post('/api/comparison/compare', upload.fields([
             }
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: responseMessage,
             responseCode,
             matchingSupcList,
@@ -154,10 +158,9 @@ app.post('/api/comparison/compare', upload.fields([
             unMatchingSupcListWithoutExistenceInGraphResponse,
             unMatchingSupcListWithoutExistenceInAudienceFile
         });
-        res.end()
     } catch (err) {
-        console.log(`Exception Occurred : ${err}`)
-        res.status(400).json({
+        console.log(`App => Data comparison error : ${err.stack}`)
+       return res.status(400).json({
             message: "Oops! Something Went Wrong!!",
             data: null
         })
@@ -180,7 +183,7 @@ app.post('/api/testDataGenerator/generate', upload.fields([
         let multiPartFileToJsonConvertedResp = await requestToJsonConverter(graphResponseFile.path);
         let customAudienceFileGeneratorResp = await customAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceIdList,accountIdList,startDateList,endDateList);
         if(!customAudienceFileGeneratorResp){
-            res.status(400).json(
+            return res.status(400).json(
                 {
                     message:"Custom Audience File Generation Failed",
                     data:null
@@ -190,7 +193,7 @@ app.post('/api/testDataGenerator/generate', upload.fields([
         
         let staticAudienceFileGeneratorResp = await staticAudienceFileResponse(multiPartFileToJsonConvertedResp,audienceIdList,accountIdList,startDateList,endDateList);
         if(!staticAudienceFileGeneratorResp){
-            res.status(400).json(
+           return res.status(400).json(
                 {
                     message:"Static Audience File Generation Failed",
                     data:null
